@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include "heap.h"
 
+#define TAMANIO_INICIAL 10
+
 /*
  * Implementación de un TAD cola de prioridad, usando un max-heap.
  *
@@ -31,7 +33,13 @@ void heap_sort(void *elementos[], size_t cant, cmp_func_t cmp) {
  * heap_destruir().
  */
 heap_t* heap_crear(cmp_func_t cmp) {
-    return NULL;
+    heap_t* heap = malloc(sizeof(heap_t));
+    if(heap == NULL) return NULL;
+    heap->datos = malloc(sizeof(void*) * TAMANIO_INICIAL);
+    if(heap->datos == NULL) return NULL;
+    heap->tamanio = TAMANIO_INICIAL;
+    heap->cantidad = 0;
+    return heap;
 }
 
 /*
@@ -51,18 +59,19 @@ heap_t* heap_crear_arr(void* arreglo[], size_t n, cmp_func_t cmp) {
  * Post: se llamó a la función indicada con cada elemento del heap. El heap
  * dejó de ser válido. */
 void heap_destruir(heap_t* heap, void destruir_elemento(void* e)) {
-
+    free(heap->datos);
+    free(heap);
 }
 
 /* Devuelve la cantidad de elementos que hay en el heap. */
 size_t heap_cantidad(const heap_t* heap) {
-    return 0;
+    return heap->cantidad;
 }
 
 /* Devuelve true si la cantidad de elementos que hay en el heap es 0, false en
  * caso contrario. */
 bool heap_esta_vacio(const heap_t* heap) {
-    return false;
+    return heap->cantidad == 0;
 }
 
 /* Agrega un elemento al heap. El elemento no puede ser NULL.
@@ -79,6 +88,7 @@ bool heap_encolar(heap_t* heap, void* elem) {
  * Pre: el heap fue creado.
  */
 void* heap_ver_max(const heap_t* heap) {
+    if(heap_esta_vacio(heap)) return NULL;
     return NULL;
 }
 
@@ -88,5 +98,6 @@ void* heap_ver_max(const heap_t* heap) {
  * Post: el elemento desencolado ya no se encuentra en el heap.
  */
 void* heap_desencolar(heap_t* heap) {
+    if(heap_esta_vacio(heap)) return NULL;
     return NULL;
 }
