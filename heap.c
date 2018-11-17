@@ -19,6 +19,64 @@ struct heap {
     cmp_func_t cmp;
 };
 
+size_t pos_hijo_der(size_t pos) {
+    return pos*2 + 2;
+}
+size_t pos_hijo_izq(size_t pos) {
+    return pos*2 + 1;
+}
+size_t pos_padre(size_t pos) {
+    return (pos-1)/2;
+}
+
+void swap(void** datos, size_t pos1, size_t pos2) {
+    void* aux = datos[pos1];
+    datos[pos1] = datos[pos2];
+    datos[pos2] = aux;
+}
+
+bool redimensionar(heap_t* heap, size_t nuevo_tamanio) {
+    void** pointer = realloc(heap->datos, nuevo_tamanio * sizeof(void*));
+    if(pointer == NULL) return false;
+    heap->datos = pointer;
+    heap->tamanio = nuevo_tamanio;
+    return true;
+}
+
+bool verificar_redimension(heap_t* heap) {
+    if(heap->cantidad == heap->tamanio) {
+        return redimensionar(heap, heap->tamanio*2);
+    }
+    size_t nuevo_tamanio = heap->tamanio / 2;
+    if(heap->cantidad <= heap->tamanio/4 && nuevo_tamanio >= TAMANIO_INICIAL) {
+        return redimensionar(heap, nuevo_tamanio);
+    }
+    return true;
+}
+
+size_t pos_hijo_prioritario(heap_t* heap, size_t pos_hijo_izq, size_t pos_hijo_der) {
+    if(heap->cmp(heap->datos[pos_hijo_izq], heap->datos[pos_hijo_der]) > 0)
+        return pos_hijo_izq;
+    return pos_hijo_der;
+}
+
+void down_heap(heap_t* heap, size_t pos) {
+    /*size_t posicion_hijo_izq = pos_hijo_izq(pos);
+    size_t posicion_hijo_der = pos_hijo_der(pos);
+    int comparacion_hijo_izq = heap->cmp(heap->datos[pos], heap->datos[posicion_hijo_izq]);
+    int comparacion_hijo_der = heap->cmp(heap->datos[pos], heap->datos[posicion_hijo_der]);
+    */
+}
+
+void up_heap(heap_t* heap, size_t pos) {
+    if(pos == 0) return;
+    size_t posicion_padre = pos_padre(pos);
+    if(heap->cmp(heap->datos[pos], heap->datos[posicion_padre]) > 0) {
+        swap(heap->datos, pos, posicion_padre);
+    }
+    up_heap(heap, pos-1);
+}
+
 /* Función de heapsort genérica. Esta función ordena mediante heap_sort
  * un arreglo de punteros opacos, para lo cual requiere que se
  * le pase una función de comparación. Modifica el arreglo "in-place".
@@ -39,6 +97,7 @@ heap_t* heap_crear(cmp_func_t cmp) {
     if(heap->datos == NULL) return NULL;
     heap->tamanio = TAMANIO_INICIAL;
     heap->cantidad = 0;
+    heap->cmp = cmp;
     return heap;
 }
 
@@ -80,7 +139,12 @@ bool heap_esta_vacio(const heap_t* heap) {
  * Post: se agregó un nuevo elemento al heap.
  */
 bool heap_encolar(heap_t* heap, void* elem) {
-    return false;
+    if(elem == NULL && !verificar_redimension(heap)) return false;
+    heap->datos[heap->cantidad] = elem;
+    if(heap->cantidad > 0)
+        up_heap(heap, heap->cantidad);
+    heap->cantidad++;
+    return true;
 }
 
 /* Devuelve el elemento con máxima prioridad. Si el heap esta vacío, devuelve
@@ -89,7 +153,7 @@ bool heap_encolar(heap_t* heap, void* elem) {
  */
 void* heap_ver_max(const heap_t* heap) {
     if(heap_esta_vacio(heap)) return NULL;
-    return NULL;
+    return heap->datos[0];
 }
 
 /* Elimina el elemento con máxima prioridad, y lo devuelve.
