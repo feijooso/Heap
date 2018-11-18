@@ -55,17 +55,24 @@ bool verificar_redimension(heap_t* heap) {
 }
 
 size_t pos_hijo_prioritario(heap_t* heap, size_t pos_hijo_izq, size_t pos_hijo_der) {
-    if(heap->cmp(heap->datos[pos_hijo_izq], heap->datos[pos_hijo_der]) > 0)
+    void* hijo_izq = heap->datos[pos_hijo_izq];
+    void* hijo_der = heap->datos[pos_hijo_der];
+    if(hijo_izq == NULL)
+        return pos_hijo_der;
+    if(hijo_der == NULL)
+        return pos_hijo_izq;
+    if(heap->cmp(hijo_izq, hijo_der) > 0)
         return pos_hijo_izq;
     return pos_hijo_der;
 }
 
-void down_heap(heap_t* heap, size_t pos) {
-    /*size_t posicion_hijo_izq = pos_hijo_izq(pos);
-    size_t posicion_hijo_der = pos_hijo_der(pos);
-    int comparacion_hijo_izq = heap->cmp(heap->datos[pos], heap->datos[posicion_hijo_izq]);
-    int comparacion_hijo_der = heap->cmp(heap->datos[pos], heap->datos[posicion_hijo_der]);
-    */
+void down_heap(heap_t* heap, size_t pos, size_t fin) {
+    if(pos > fin) return;
+    size_t hijo_prioritario = pos_hijo_prioritario(heap, pos_hijo_izq(pos), pos_hijo_der(pos));
+    if(heap->cmp(heap->datos[pos], heap->datos[hijo_prioritario]) < 0) {
+        swap(heap->datos, pos, hijo_prioritario);
+    }
+    down_heap(heap, pos+1, fin);
 }
 
 void up_heap(heap_t* heap, size_t pos) {
@@ -139,7 +146,7 @@ bool heap_esta_vacio(const heap_t* heap) {
  * Post: se agregó un nuevo elemento al heap.
  */
 bool heap_encolar(heap_t* heap, void* elem) {
-    if(elem == NULL && !verificar_redimension(heap)) return false;
+    if(elem == NULL || !verificar_redimension(heap)) return false;
     heap->datos[heap->cantidad] = elem;
     if(heap->cantidad > 0)
         up_heap(heap, heap->cantidad);
@@ -162,6 +169,12 @@ void* heap_ver_max(const heap_t* heap) {
  * Post: el elemento desencolado ya no se encuentra en el heap.
  */
 void* heap_desencolar(heap_t* heap) {
-    if(heap_esta_vacio(heap)) return NULL;
-    return NULL;
+    if(heap_esta_vacio(heap) || !verificar_redimension(heap)) return NULL;
+    heap->cantidad--;
+    void* aux = heap->datos[0];
+    swap(heap->datos, 0, heap->cantidad);
+    heap->datos[heap->cantidad] = NULL;
+    if(heap->cantidad > 1)
+        down_heap(heap, 0, heap->cantidad/2-1);
+    return aux;
 }
