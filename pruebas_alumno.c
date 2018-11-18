@@ -37,6 +37,8 @@ void prueba_heap_mayores_encolar() {
         printf("nuevo maximo es %i", numero[i]);
         print_test("" , heap_ver_max(heap) == &numero[i]);
     }
+    printf("cantidad = %i", tam);
+    print_test("", heap_cantidad(heap) == tam);
     heap_destruir(heap, NULL);
 }
 
@@ -49,6 +51,8 @@ void prueba_heap_menores_encolar() {
         printf("nuevo minimo es %i", numero[i]);
         print_test("" , heap_ver_max(heap) == &numero[i]);
     }
+    printf("cantidad = %i", tam);
+    print_test("", heap_cantidad(heap) == tam);
     heap_destruir(heap, NULL);
 }
 
@@ -63,6 +67,7 @@ void prueba_heap_mayores_desencolar() {
         printf("%i desencolado", numero[i]);
         print_test("", heap_desencolar(heap) == &numero[i]);
     }
+    print_test("cantidad = 0", heap_cantidad(heap) == 0);
     heap_destruir(heap, NULL);
 }
 
@@ -77,6 +82,23 @@ void prueba_heap_menores_desencolar() {
         printf("%i desencolado", numero[i]);
         print_test("", heap_desencolar(heap) == &numero[i]);
     }
+    print_test("cantidad = 0", heap_cantidad(heap) == 0);
+    heap_destruir(heap, NULL);
+}
+
+void prueba_heap_elementos_repetidos() {
+    heap_t* heap = heap_crear(mayor);
+    int numero[] = {1,1,2,2,3,3,4,4,5};
+    int tam = 9;
+    for(int i=0; i<tam; i++) {
+        heap_encolar(heap, &numero[i]);
+        printf("nuevo maximo es %i", numero[i]);
+        print_test("" , *(int*)heap_ver_max(heap) == numero[i]);
+    }
+    for(int i=tam-1; i>=0; i--) {
+        printf("%i desencolado", numero[i]);
+        print_test("", *(int*)heap_desencolar(heap) == numero[i]);
+    }
     heap_destruir(heap, NULL);
 }
 
@@ -85,5 +107,6 @@ void pruebas_heap_alumno() {
     //prueba_heap_mayores_encolar();
     //prueba_heap_menores_encolar();
     //prueba_heap_mayores_desencolar();
-    prueba_heap_menores_desencolar();
+    //prueba_heap_menores_desencolar();
+    prueba_heap_elementos_repetidos();
 }
