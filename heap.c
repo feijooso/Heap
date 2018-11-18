@@ -54,34 +54,34 @@ bool verificar_redimension(heap_t* heap) {
     return true;
 }
 
-size_t pos_hijo_prioritario(heap_t* heap, size_t pos_hijo_izq, size_t pos_hijo_der) {
-    void* hijo_izq = heap->datos[pos_hijo_izq];
-    void* hijo_der = heap->datos[pos_hijo_der];
+size_t pos_hijo_prioritario(void** datos, cmp_func_t cmp, size_t pos_hijo_izq, size_t pos_hijo_der) {
+    void* hijo_izq = datos[pos_hijo_izq];
+    void* hijo_der = datos[pos_hijo_der];
     if(hijo_izq == NULL)
         return pos_hijo_der;
     if(hijo_der == NULL)
         return pos_hijo_izq;
-    if(heap->cmp(hijo_izq, hijo_der) > 0)
+    if(cmp(hijo_izq, hijo_der) > 0)
         return pos_hijo_izq;
     return pos_hijo_der;
 }
 
-void down_heap(heap_t* heap, size_t pos, size_t fin) {
+void down_heap(void** datos, size_t pos, size_t fin, cmp_func_t cmp) {
     if(pos > fin) return;
-    size_t hijo_prioritario = pos_hijo_prioritario(heap, pos_hijo_izq(pos), pos_hijo_der(pos));
-    if(heap->cmp(heap->datos[pos], heap->datos[hijo_prioritario]) < 0) {
-        swap(heap->datos, pos, hijo_prioritario);
+    size_t hijo_prioritario = pos_hijo_prioritario(datos, cmp, pos_hijo_izq(pos), pos_hijo_der(pos));
+    if(cmp(datos[pos], datos[hijo_prioritario]) < 0) {
+        swap(datos, pos, hijo_prioritario);
     }
-    down_heap(heap, pos+1, fin);
+    down_heap(datos, pos+1, fin, cmp);
 }
 
-void up_heap(heap_t* heap, size_t pos) {
+void up_heap(void** datos, size_t pos, cmp_func_t cmp) {
     if(pos == 0) return;
     size_t posicion_padre = pos_padre(pos);
-    if(heap->cmp(heap->datos[pos], heap->datos[posicion_padre]) > 0) {
-        swap(heap->datos, pos, posicion_padre);
+    if(cmp(datos[pos], datos[posicion_padre]) > 0) {
+        swap(datos, pos, posicion_padre);
     }
-    up_heap(heap, pos-1);
+    up_heap(datos, pos-1, cmp);
 }
 
 /* Función de heapsort genérica. Esta función ordena mediante heap_sort
@@ -90,7 +90,7 @@ void up_heap(heap_t* heap, size_t pos) {
  * Nótese que esta función NO es formalmente parte del TAD Heap.
  */
 void heap_sort(void *elementos[], size_t cant, cmp_func_t cmp) {
-
+    
 }
 
 /* Crea un heap. Recibe como único parámetro la función de comparación a
@@ -149,7 +149,7 @@ bool heap_encolar(heap_t* heap, void* elem) {
     if(elem == NULL || !verificar_redimension(heap)) return false;
     heap->datos[heap->cantidad] = elem;
     if(heap->cantidad > 0)
-        up_heap(heap, heap->cantidad);
+        up_heap(heap->datos, heap->cantidad, heap->cmp);
     heap->cantidad++;
     return true;
 }
@@ -175,6 +175,6 @@ void* heap_desencolar(heap_t* heap) {
     swap(heap->datos, 0, heap->cantidad);
     heap->datos[heap->cantidad] = NULL;
     if(heap->cantidad > 1)
-        down_heap(heap, 0, heap->cantidad/2-1);
+        down_heap(heap->datos, 0, heap->cantidad/2-1, heap->cmp);
     return aux;
 }
