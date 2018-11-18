@@ -2,6 +2,7 @@
 #include "testing.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int mayor(const void* a, const void* b) {
     int c = *(int*) a;
@@ -102,11 +103,56 @@ void prueba_heap_elementos_repetidos() {
     heap_destruir(heap, NULL);
 }
 
+void** crear_valores(int tamanio, int* numero) {
+    void** valores = malloc(sizeof(void*) * tamanio);
+    if(valores == NULL) return NULL;
+    for(int i=0; i<tamanio; i++) {
+        int* valor = malloc(sizeof(int));
+        if(valor == NULL) {
+            for(int n=0; n<i; n++) {
+                free(valores[n]);
+            }
+            free(valores);
+            return NULL;
+        }
+        *valor = numero[i];
+        valores[i] = valor;
+    }
+    return valores;
+}
+
+void destruir_valores(void** valores, size_t tam) {
+    for(int i=0; i<tam; i++) {
+        free(valores[i]);
+    }
+    free(valores);
+}
+
+void prueba_heap_sort() {
+    heap_t* heap = heap_crear(mayor);
+    int numero[] = {3,4,1,2,8,6,5,9,7};
+    int ordenado[] = {1,2,3,4,5,6,7,8,9};
+    int tam = 9;
+    void** parametro = crear_valores(tam, numero);
+    heap_sort(parametro, tam, mayor);
+    bool esta_ordenado = true;
+    for(int i=0; i<tam; i++) {
+        if(ordenado[i] != *(int*)parametro[i]) {
+            esta_ordenado = false;
+            break;
+        }
+    }
+    print_test("esta ordenado", esta_ordenado);
+    destruir_valores(parametro, tam);
+    heap_destruir(heap, NULL);
+}
+
 void pruebas_heap_alumno() {
     //prueba_crear();
     //prueba_heap_mayores_encolar();
     //prueba_heap_menores_encolar();
     //prueba_heap_mayores_desencolar();
     //prueba_heap_menores_desencolar();
-    prueba_heap_elementos_repetidos();
+    //prueba_heap_elementos_repetidos();
+    prueba_heap_sort();
 }

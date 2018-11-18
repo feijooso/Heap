@@ -90,7 +90,11 @@ void up_heap(void** datos, size_t pos, cmp_func_t cmp) {
  * Nótese que esta función NO es formalmente parte del TAD Heap.
  */
 void heap_sort(void *elementos[], size_t cant, cmp_func_t cmp) {
-    
+    if(cant == 0) return;
+    size_t pos = cant-1;
+    up_heap(elementos, pos, cmp);
+    swap(elementos, 0, pos);
+    heap_sort(elementos, pos, cmp);
 }
 
 /* Crea un heap. Recibe como único parámetro la función de comparación a
