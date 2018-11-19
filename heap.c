@@ -112,6 +112,22 @@ heap_t* heap_crear(cmp_func_t cmp) {
     return heap;
 }
 
+void heapify(void* arreglo[], size_t tam, size_t pos, cmp_func_t cmp) {
+    size_t actual = pos;
+    size_t posicion_hijo_izq = pos_hijo_izq(pos);
+    size_t posicion_hijo_der = pos_hijo_der(pos);
+    if(posicion_hijo_izq < tam && cmp(arreglo[actual], arreglo[posicion_hijo_izq]) < 0) {
+        actual = posicion_hijo_izq;
+    }
+    if(posicion_hijo_der < tam && cmp(arreglo[actual], arreglo[posicion_hijo_der]) < 0) {
+        actual = posicion_hijo_der;
+    }
+    if(pos != actual) {
+        swap(arreglo, pos, actual);
+        heapify(arreglo, tam, actual, cmp);
+    }
+}
+
 /*
  * Constructor alternativo del heap. Además de la función de comparación,
  * recibe un arreglo de valores con que inicializar el heap. Complejidad
@@ -121,14 +137,18 @@ heap_t* heap_crear(cmp_func_t cmp) {
  * los valores de uno en uno
 */
 heap_t* heap_crear_arr(void* arreglo[], size_t n, cmp_func_t cmp) {
-    heap_t* heap = heap_crear(cmp);
+    heap_t* heap = malloc(sizeof(heap_t));
     if(heap == NULL) return NULL;
+    heap->tamanio = TAMANIO_INICIAL;
+    heap->cantidad = n;
+    heap->cmp = cmp;
     if(n > 1) {
-        down_heap(arreglo, 0, n/2-1, cmp);
-        heap->datos = arreglo;
-    } else {
-        heap->datos[0] = arreglo[0];
+        for(size_t i=n/2-1; i>0; i--) {
+            heapify(arreglo, n, i, cmp);
+        }
+        heapify(arreglo, n, 0, cmp); //size_t falla si llega a menos de 0.
     }
+    heap->datos = arreglo;
     return heap;
 }
 

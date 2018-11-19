@@ -157,16 +157,16 @@ void prueba_heap_destruir() {
     for(int i=0; i<tam; i++) {
         heap_encolar(heap, valores[i]);
     }
-    heap_destruir(heap, NULL);
+    heap_destruir(heap, free);
     free(valores);
 }
 
 void prueba_heap_crear_arr() {
-    heap_t* heap = heap_crear(mayor);
     int numero[] = {3,4,1,2,8,6,5,9,7};
     int ordenado[] = {9,8,6,7,3,1,5,2,4};
     int tam = 9;
     void** parametro = crear_valores(tam, numero);
+    heap_t* heap = heap_crear_arr(parametro, tam, mayor);
     bool heapify = true;
     for(int i=0; i<tam; i++) {
         if(ordenado[i] != *(int*)parametro[i]) {
@@ -175,8 +175,7 @@ void prueba_heap_crear_arr() {
         }
     }
     print_test("heapify", heapify);
-    destruir_valores(parametro, tam);
-    heap_destruir(heap, NULL);
+    heap_destruir(heap, free);
 }
 
 void pruebas_heap_alumno() {
@@ -187,6 +186,6 @@ void pruebas_heap_alumno() {
     //prueba_heap_menores_desencolar();
     //prueba_heap_elementos_repetidos();
     //prueba_heap_sort();
-    prueba_heap_destruir();
-    //prueba_heap_crear_arr();
+    //prueba_heap_destruir();
+    prueba_heap_crear_arr();
 }
