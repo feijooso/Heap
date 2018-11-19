@@ -20,6 +20,31 @@ int menor(const void* a, const void* b) {
     return -1;
 }
 
+void** crear_valores(int tamanio, int* numero) {
+    void** valores = malloc(sizeof(void*) * tamanio);
+    if(valores == NULL) return NULL;
+    for(int i=0; i<tamanio; i++) {
+        int* valor = malloc(sizeof(int));
+        if(valor == NULL) {
+            for(int n=0; n<i; n++) {
+                free(valores[n]);
+            }
+            free(valores);
+            return NULL;
+        }
+        *valor = numero[i];
+        valores[i] = valor;
+    }
+    return valores;
+}
+
+void destruir_valores(void** valores, size_t tam) {
+    for(int i=0; i<tam; i++) {
+        free(valores[i]);
+    }
+    free(valores);
+}
+
 void prueba_crear() {
     heap_t* heap = heap_crear(mayor);
     print_test("esta vacio", heap_esta_vacio(heap));
@@ -69,6 +94,7 @@ void prueba_heap_mayores_desencolar() {
         print_test("", heap_desencolar(heap) == &numero[i]);
     }
     print_test("cantidad = 0", heap_cantidad(heap) == 0);
+    print_test("desencolar vacio = NULL", heap_desencolar(heap) == NULL);
     heap_destruir(heap, NULL);
 }
 
@@ -84,6 +110,7 @@ void prueba_heap_menores_desencolar() {
         print_test("", heap_desencolar(heap) == &numero[i]);
     }
     print_test("cantidad = 0", heap_cantidad(heap) == 0);
+    print_test("desencolar vacio = NULL", heap_desencolar(heap) == NULL);
     heap_destruir(heap, NULL);
 }
 
@@ -101,31 +128,6 @@ void prueba_heap_elementos_repetidos() {
         print_test("", *(int*)heap_desencolar(heap) == numero[i]);
     }
     heap_destruir(heap, NULL);
-}
-
-void** crear_valores(int tamanio, int* numero) {
-    void** valores = malloc(sizeof(void*) * tamanio);
-    if(valores == NULL) return NULL;
-    for(int i=0; i<tamanio; i++) {
-        int* valor = malloc(sizeof(int));
-        if(valor == NULL) {
-            for(int n=0; n<i; n++) {
-                free(valores[n]);
-            }
-            free(valores);
-            return NULL;
-        }
-        *valor = numero[i];
-        valores[i] = valor;
-    }
-    return valores;
-}
-
-void destruir_valores(void** valores, size_t tam) {
-    for(int i=0; i<tam; i++) {
-        free(valores[i]);
-    }
-    free(valores);
 }
 
 void prueba_heap_sort() {
@@ -147,6 +149,36 @@ void prueba_heap_sort() {
     heap_destruir(heap, NULL);
 }
 
+void prueba_heap_destruir() {
+    heap_t* heap = heap_crear(mayor);
+    int numero[] = {};
+    int tam = 0;
+    void** valores = crear_valores(tam, numero);
+    for(int i=0; i<tam; i++) {
+        heap_encolar(heap, valores[i]);
+    }
+    heap_destruir(heap, NULL);
+    free(valores);
+}
+
+void prueba_heap_crear_arr() {
+    heap_t* heap = heap_crear(mayor);
+    int numero[] = {3,4,1,2,8,6,5,9,7};
+    int ordenado[] = {9,8,6,7,3,1,5,2,4};
+    int tam = 9;
+    void** parametro = crear_valores(tam, numero);
+    bool heapify = true;
+    for(int i=0; i<tam; i++) {
+        if(ordenado[i] != *(int*)parametro[i]) {
+            heapify = false;
+            break;
+        }
+    }
+    print_test("heapify", heapify);
+    destruir_valores(parametro, tam);
+    heap_destruir(heap, NULL);
+}
+
 void pruebas_heap_alumno() {
     //prueba_crear();
     //prueba_heap_mayores_encolar();
@@ -154,5 +186,7 @@ void pruebas_heap_alumno() {
     //prueba_heap_mayores_desencolar();
     //prueba_heap_menores_desencolar();
     //prueba_heap_elementos_repetidos();
-    prueba_heap_sort();
+    //prueba_heap_sort();
+    prueba_heap_destruir();
+    //prueba_heap_crear_arr();
 }

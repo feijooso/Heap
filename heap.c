@@ -121,7 +121,15 @@ heap_t* heap_crear(cmp_func_t cmp) {
  * los valores de uno en uno
 */
 heap_t* heap_crear_arr(void* arreglo[], size_t n, cmp_func_t cmp) {
-    return NULL;
+    heap_t* heap = heap_crear(cmp);
+    if(heap == NULL) return NULL;
+    if(n > 1) {
+        down_heap(arreglo, 0, n/2-1, cmp);
+        heap->datos = arreglo;
+    } else {
+        heap->datos[0] = arreglo[0];
+    }
+    return heap;
 }
 
 /* Elimina el heap, llamando a la función dada para cada elemento del mismo.
@@ -129,6 +137,11 @@ heap_t* heap_crear_arr(void* arreglo[], size_t n, cmp_func_t cmp) {
  * Post: se llamó a la función indicada con cada elemento del heap. El heap
  * dejó de ser válido. */
 void heap_destruir(heap_t* heap, void destruir_elemento(void* e)) {
+    if(destruir_elemento != NULL) {
+        while(!heap_esta_vacio(heap)) {
+            destruir_elemento(heap_desencolar(heap));
+        }
+    }
     free(heap->datos);
     free(heap);
 }
