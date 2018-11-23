@@ -19,14 +19,18 @@ struct heap {
     cmp_func_t cmp;
 };
 
-size_t pos_hijo_der(size_t pos) {
-    return pos*2 + 2;
-}
 size_t pos_hijo_izq(size_t pos) {
     return pos*2 + 1;
 }
+size_t pos_hijo_der(size_t pos) {
+    return pos_hijo_izq(pos) + 1;
+}
 size_t pos_padre(size_t pos) {
     return (pos-1)/2;
+}
+size_t pos_ultimo_padre(size_t tam) {
+    if(tam<=1) return 0;
+    return tam/2-1;
 }
 
 void swap(void** datos, size_t pos1, size_t pos2) {
@@ -54,34 +58,30 @@ bool verificar_redimension(heap_t* heap) {
     return true;
 }
 
-size_t pos_hijo_prioritario(void** datos, cmp_func_t cmp, size_t pos_hijo_izq, size_t pos_hijo_der) {
-    void* hijo_izq = datos[pos_hijo_izq];
-    void* hijo_der = datos[pos_hijo_der];
-    if(hijo_izq == NULL)
-        return pos_hijo_der;
-    if(hijo_der == NULL)
-        return pos_hijo_izq;
-    if(cmp(hijo_izq, hijo_der) > 0)
-        return pos_hijo_izq;
-    return pos_hijo_der;
+void heapify(void* arreglo[], size_t tam, size_t pos, cmp_func_t cmp) {    
+    while(pos<tam) {
+        size_t posicion_hijo_izq = pos_hijo_izq(pos);
+        size_t posicion_hijo_der = pos_hijo_der(pos);
+        size_t actual = pos;
+
+        if(posicion_hijo_izq < tam && cmp(arreglo[actual], arreglo[posicion_hijo_izq]) < 0) 
+            actual = posicion_hijo_izq;
+        if(posicion_hijo_der < tam && cmp(arreglo[actual], arreglo[posicion_hijo_der]) < 0) 
+            actual = posicion_hijo_der;
+        if(actual == pos)
+            return;
+        swap(arreglo, actual, pos);
+        pos = actual;
+    }
 }
 
-void down_heap(void** datos, size_t pos, size_t fin, cmp_func_t cmp) {
-    if(pos > fin) return;
-    size_t hijo_prioritario = pos_hijo_prioritario(datos, cmp, pos_hijo_izq(pos), pos_hijo_der(pos));
-    if(cmp(datos[pos], datos[hijo_prioritario]) < 0) {
-        swap(datos, pos, hijo_prioritario);
+void armar_heap(void* arreglo[], size_t tam, cmp_func_t cmp) {
+    size_t pos = pos_ultimo_padre(tam);
+    while(pos > 0) {
+        heapify(arreglo, tam, pos, cmp);
+        pos -= 1;
     }
-    down_heap(datos, pos+1, fin, cmp);
-}
-
-void up_heap(void** datos, size_t pos, cmp_func_t cmp) {
-    if(pos == 0) return;
-    size_t posicion_padre = pos_padre(pos);
-    if(cmp(datos[pos], datos[posicion_padre]) > 0) {
-        swap(datos, pos, posicion_padre);
-    }
-    up_heap(datos, pos-1, cmp);
+    heapify(arreglo, tam, 0, cmp);
 }
 
 /* Función de heapsort genérica. Esta función ordena mediante heap_sort
@@ -89,12 +89,14 @@ void up_heap(void** datos, size_t pos, cmp_func_t cmp) {
  * le pase una función de comparación. Modifica el arreglo "in-place".
  * Nótese que esta función NO es formalmente parte del TAD Heap.
  */
-void heap_sort(void *elementos[], size_t cant, cmp_func_t cmp) {
-    if(cant == 0) return;
-    size_t pos = cant-1;
-    up_heap(elementos, pos, cmp);
-    swap(elementos, 0, pos);
-    heap_sort(elementos, pos, cmp);
+void heap_sort(void* elementos[], size_t cant, cmp_func_t cmp) {
+    heapify(elementos, cant, 0, cmp);
+    size_t pos_ultimo_elemento = cant-1;
+    while(pos_ultimo_elemento > 0) {
+        swap(elementos, 0, pos_ultimo_elemento);
+        heapify(elementos, pos_ultimo_elemento, 0, cmp);
+        pos_ultimo_elemento--;
+    }
 }
 
 /* Crea un heap. Recibe como único parámetro la función de comparación a
@@ -112,22 +114,6 @@ heap_t* heap_crear(cmp_func_t cmp) {
     return heap;
 }
 
-void heapify(void* arreglo[], size_t tam, size_t pos, cmp_func_t cmp) {
-    size_t actual = pos;
-    size_t posicion_hijo_izq = pos_hijo_izq(pos);
-    size_t posicion_hijo_der = pos_hijo_der(pos);
-    if(posicion_hijo_izq < tam && cmp(arreglo[actual], arreglo[posicion_hijo_izq]) < 0) {
-        actual = posicion_hijo_izq;
-    }
-    if(posicion_hijo_der < tam && cmp(arreglo[actual], arreglo[posicion_hijo_der]) < 0) {
-        actual = posicion_hijo_der;
-    }
-    if(pos != actual) {
-        swap(arreglo, pos, actual);
-        heapify(arreglo, tam, actual, cmp);
-    }
-}
-
 /*
  * Constructor alternativo del heap. Además de la función de comparación,
  * recibe un arreglo de valores con que inicializar el heap. Complejidad
@@ -139,17 +125,13 @@ void heapify(void* arreglo[], size_t tam, size_t pos, cmp_func_t cmp) {
 heap_t* heap_crear_arr(void* arreglo[], size_t n, cmp_func_t cmp) {
     heap_t* heap = malloc(sizeof(heap_t));
     if(heap == NULL) return NULL;
-    heap->tamanio = TAMANIO_INICIAL;
+      heap->tamanio = TAMANIO_INICIAL;
     heap->cantidad = n;
     heap->cmp = cmp;
-    if(n > 1) {
-        for(size_t i=n/2-1; i>0; i--) {
-            heapify(arreglo, n, i, cmp);
-        }
-        heapify(arreglo, n, 0, cmp); //size_t falla si llega a menos de 0.
-    }
+    armar_heap(arreglo, n, cmp);
     heap->datos = arreglo;
     return heap;
+    return NULL;
 }
 
 /* Elimina el heap, llamando a la función dada para cada elemento del mismo.
@@ -158,8 +140,8 @@ heap_t* heap_crear_arr(void* arreglo[], size_t n, cmp_func_t cmp) {
  * dejó de ser válido. */
 void heap_destruir(heap_t* heap, void destruir_elemento(void* e)) {
     if(destruir_elemento != NULL) {
-        while(!heap_esta_vacio(heap)) {
-            destruir_elemento(heap_desencolar(heap));
+        for(int i=0; i<heap->cantidad; i++) {
+            free(heap->datos[i]);
         }
     }
     free(heap->datos);
@@ -185,9 +167,8 @@ bool heap_esta_vacio(const heap_t* heap) {
 bool heap_encolar(heap_t* heap, void* elem) {
     if(elem == NULL || !verificar_redimension(heap)) return false;
     heap->datos[heap->cantidad] = elem;
-    if(heap->cantidad > 0)
-        up_heap(heap->datos, heap->cantidad, heap->cmp);
     heap->cantidad++;
+    armar_heap(heap->datos, heap->cantidad, heap->cmp);
     return true;
 }
 
@@ -211,7 +192,6 @@ void* heap_desencolar(heap_t* heap) {
     void* aux = heap->datos[0];
     swap(heap->datos, 0, heap->cantidad);
     heap->datos[heap->cantidad] = NULL;
-    if(heap->cantidad > 1)
-        down_heap(heap->datos, 0, heap->cantidad/2-1, heap->cmp);
+    armar_heap(heap->datos, heap->cantidad, heap->cmp);
     return aux;
 }
