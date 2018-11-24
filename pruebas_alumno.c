@@ -56,8 +56,8 @@ void prueba_crear() {
 
 void prueba_heap_mayores_encolar() {
     heap_t* heap = heap_crear(mayor);
-    int numero[] = {1,2,3,4,5,6,7,8,9};
-    int tam = 9; 
+    int numero[] = {1,2,3,4};
+    int tam = 4; 
     for(int i=0; i<tam; i++) {
         heap_encolar(heap, &numero[i]);
         printf("nuevo maximo es %i", numero[i]);
@@ -131,7 +131,6 @@ void prueba_heap_elementos_repetidos() {
 }
 
 void prueba_heap_sort() {
-    heap_t* heap = heap_crear(mayor);
     int numero[] = {3,4,1,2,8,6,5,9,7};
     int ordenado[] = {1,2,3,4,5,6,7,8,9};
     int tam = 9;
@@ -146,7 +145,6 @@ void prueba_heap_sort() {
     }
     print_test("esta ordenado", esta_ordenado);
     destruir_valores(parametro, tam);
-    heap_destruir(heap, NULL);
 }
 
 void prueba_heap_destruir() {
@@ -185,7 +183,7 @@ void pruebas_heap_alumno() {
     //prueba_heap_mayores_desencolar();
     //prueba_heap_menores_desencolar();
     //prueba_heap_elementos_repetidos();
-    //prueba_heap_sort();
+    prueba_heap_sort();
     //prueba_heap_destruir();
-    prueba_heap_crear_arr();
+    //prueba_heap_crear_arr();
 }

@@ -90,7 +90,7 @@ void armar_heap(void* arreglo[], size_t tam, cmp_func_t cmp) {
  * Nótese que esta función NO es formalmente parte del TAD Heap.
  */
 void heap_sort(void* elementos[], size_t cant, cmp_func_t cmp) {
-    heapify(elementos, cant, 0, cmp);
+    armar_heap(elementos, cant, cmp);
     size_t pos_ultimo_elemento = cant-1;
     while(pos_ultimo_elemento > 0) {
         swap(elementos, 0, pos_ultimo_elemento);
