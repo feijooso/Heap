@@ -58,7 +58,7 @@ bool verificar_redimension(heap_t* heap) {
     return true;
 }
 
-void heapify(void* arreglo[], size_t tam, size_t pos, cmp_func_t cmp) {    
+void down_heap(void* arreglo[], size_t tam, size_t pos, cmp_func_t cmp) {    
     while(pos<tam) {
         size_t posicion_hijo_izq = pos_hijo_izq(pos);
         size_t posicion_hijo_der = pos_hijo_der(pos);
@@ -75,26 +75,26 @@ void heapify(void* arreglo[], size_t tam, size_t pos, cmp_func_t cmp) {
     }
 }
 
-void armar_heap(void* arreglo[], size_t tam, cmp_func_t cmp) {
+void heapify(void* arreglo[], size_t tam, cmp_func_t cmp) {
     size_t pos = pos_ultimo_padre(tam);
     while(pos > 0) {
-        heapify(arreglo, tam, pos, cmp);
+        down_heap(arreglo, tam, pos, cmp);
         pos -= 1;
     }
-    heapify(arreglo, tam, 0, cmp);
+    down_heap(arreglo, tam, 0, cmp); //el size_t no puede ser menor que 0.
 }
 
 /* Función de heapsort genérica. Esta función ordena mediante heap_sort
  * un arreglo de punteros opacos, para lo cual requiere que se
  * le pase una función de comparación. Modifica el arreglo "in-place".
  * Nótese que esta función NO es formalmente parte del TAD Heap.
- */
+ */ 
 void heap_sort(void* elementos[], size_t cant, cmp_func_t cmp) {
-    armar_heap(elementos, cant, cmp);
+    heapify(elementos, cant, cmp);
     size_t pos_ultimo_elemento = cant-1;
     while(pos_ultimo_elemento > 0) {
         swap(elementos, 0, pos_ultimo_elemento);
-        heapify(elementos, pos_ultimo_elemento, 0, cmp);
+        heapify(elementos, pos_ultimo_elemento, cmp);
         pos_ultimo_elemento--;
     }
 }
@@ -128,7 +128,7 @@ heap_t* heap_crear_arr(void* arreglo[], size_t n, cmp_func_t cmp) {
       heap->tamanio = TAMANIO_INICIAL;
     heap->cantidad = n;
     heap->cmp = cmp;
-    armar_heap(arreglo, n, cmp);
+    heapify(arreglo, n, cmp);
     heap->datos = arreglo;
     return heap;
     return NULL;
@@ -168,7 +168,7 @@ bool heap_encolar(heap_t* heap, void* elem) {
     if(elem == NULL || !verificar_redimension(heap)) return false;
     heap->datos[heap->cantidad] = elem;
     heap->cantidad++;
-    armar_heap(heap->datos, heap->cantidad, heap->cmp);
+    heapify(heap->datos, heap->cantidad, heap->cmp);
     return true;
 }
 
@@ -192,6 +192,6 @@ void* heap_desencolar(heap_t* heap) {
     void* aux = heap->datos[0];
     swap(heap->datos, 0, heap->cantidad);
     heap->datos[heap->cantidad] = NULL;
-    armar_heap(heap->datos, heap->cantidad, heap->cmp);
+    heapify(heap->datos, heap->cantidad, heap->cmp);
     return aux;
 }
