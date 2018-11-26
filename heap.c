@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "heap.h"
 
 #define TAMANIO_INICIAL 10
@@ -58,15 +59,32 @@ bool verificar_redimension(heap_t* heap) {
     return true;
 }
 
-void down_heap(void* arreglo[], size_t tam, size_t pos, cmp_func_t cmp) {    
-    while(pos<tam) {
+ void up_heap(void** datos, size_t pos, cmp_func_t cmp) {
+
+     if(pos == 0) return;
+
+     size_t posicion_padre = pos_padre(pos);
+
+     if(cmp(datos[pos], datos[posicion_padre]) > 0) {
+
+         swap(datos, pos, posicion_padre);
+
+     }
+
+     up_heap(datos, pos-1, cmp);
+
+ }
+
+void down_heap(void* arreglo[], size_t tam, size_t pos, cmp_func_t cmp) {
+
+    while(pos<tam-1) {
         size_t posicion_hijo_izq = pos_hijo_izq(pos);
         size_t posicion_hijo_der = pos_hijo_der(pos);
         size_t actual = pos;
 
-        if(posicion_hijo_izq < tam && cmp(arreglo[actual], arreglo[posicion_hijo_izq]) < 0) 
+        if(posicion_hijo_izq < tam && cmp(arreglo[actual], arreglo[posicion_hijo_izq]) < 0)
             actual = posicion_hijo_izq;
-        if(posicion_hijo_der < tam && cmp(arreglo[actual], arreglo[posicion_hijo_der]) < 0) 
+        if(posicion_hijo_der < tam && cmp(arreglo[actual], arreglo[posicion_hijo_der]) < 0)
             actual = posicion_hijo_der;
         if(actual == pos)
             return;
@@ -77,24 +95,24 @@ void down_heap(void* arreglo[], size_t tam, size_t pos, cmp_func_t cmp) {
 
 void heapify(void* arreglo[], size_t tam, cmp_func_t cmp) {
     size_t pos = pos_ultimo_padre(tam);
-    while(pos > 0) {
-        down_heap(arreglo, tam, pos, cmp);
-        pos -= 1;
+
+    for (int i = (int)pos; i >= 0 ; i--){
+        down_heap(arreglo, tam, i, cmp);
     }
-    down_heap(arreglo, tam, 0, cmp); //el size_t no puede ser menor que 0.
+
 }
 
 /* Función de heapsort genérica. Esta función ordena mediante heap_sort
  * un arreglo de punteros opacos, para lo cual requiere que se
  * le pase una función de comparación. Modifica el arreglo "in-place".
  * Nótese que esta función NO es formalmente parte del TAD Heap.
- */ 
+ */
 void heap_sort(void* elementos[], size_t cant, cmp_func_t cmp) {
     heapify(elementos, cant, cmp);
     size_t pos_ultimo_elemento = cant-1;
     while(pos_ultimo_elemento > 0) {
         swap(elementos, 0, pos_ultimo_elemento);
-        heapify(elementos, pos_ultimo_elemento, cmp);
+        down_heap(elementos, pos_ultimo_elemento, 0, cmp);
         pos_ultimo_elemento--;
     }
 }
@@ -125,7 +143,7 @@ heap_t* heap_crear(cmp_func_t cmp) {
 heap_t* heap_crear_arr(void* arreglo[], size_t n, cmp_func_t cmp) {
     heap_t* heap = malloc(sizeof(heap_t));
     if(heap == NULL) return NULL;
-      heap->tamanio = TAMANIO_INICIAL;
+    heap->tamanio = TAMANIO_INICIAL;
     heap->cantidad = n;
     heap->cmp = cmp;
     heapify(arreglo, n, cmp);
@@ -168,7 +186,7 @@ bool heap_encolar(heap_t* heap, void* elem) {
     if(elem == NULL || !verificar_redimension(heap)) return false;
     heap->datos[heap->cantidad] = elem;
     heap->cantidad++;
-    heapify(heap->datos, heap->cantidad, heap->cmp);
+    up_heap(heap->datos, heap->cantidad-1, heap->cmp);
     return true;
 }
 
@@ -192,6 +210,6 @@ void* heap_desencolar(heap_t* heap) {
     void* aux = heap->datos[0];
     swap(heap->datos, 0, heap->cantidad);
     heap->datos[heap->cantidad] = NULL;
-    heapify(heap->datos, heap->cantidad, heap->cmp);
+    down_heap(heap->datos, heap->cantidad, 0, heap->cmp);
     return aux;
 }

@@ -46,6 +46,7 @@ void destruir_valores(void** valores, size_t tam) {
 }
 
 void prueba_crear() {
+    printf("%s\n","PRUEBAS CREAR");
     heap_t* heap = heap_crear(mayor);
     print_test("esta vacio", heap_esta_vacio(heap));
     print_test("cantidad == 0", heap_cantidad(heap) == 0);
@@ -55,9 +56,10 @@ void prueba_crear() {
 }
 
 void prueba_heap_mayores_encolar() {
+    printf("%s\n","PRUEBAS ENCOLAR MAYORES");
     heap_t* heap = heap_crear(mayor);
-    int numero[] = {1,2,3,4};
-    int tam = 4; 
+    int numero[] = {1,2,3,4,5,6,7,8,9};
+    int tam = 9; 
     for(int i=0; i<tam; i++) {
         heap_encolar(heap, &numero[i]);
         printf("nuevo maximo es %i", numero[i]);
@@ -69,6 +71,7 @@ void prueba_heap_mayores_encolar() {
 }
 
 void prueba_heap_menores_encolar() {
+    printf("%s\n","PRUEBAS ENCOLAR MENORES" );
     heap_t* heap = heap_crear(menor);
     int numero[] = {1,2,3,4,5,6,7,8,9};
     int tam = 9; 
@@ -83,6 +86,7 @@ void prueba_heap_menores_encolar() {
 }
 
 void prueba_heap_mayores_desencolar() {
+    printf("%s\n","PRUEBAS DESENCOLAR MAYORES" );
     heap_t* heap = heap_crear(mayor);
     int numero[] = {1,2,3,4,5,6,7,8,9};
     int tam = 9; 
@@ -99,6 +103,7 @@ void prueba_heap_mayores_desencolar() {
 }
 
 void prueba_heap_menores_desencolar() {
+    printf("%s\n", "PRUEBAS DESENCOLAR MENORES");
     heap_t* heap = heap_crear(menor);
     int numero[] = {1,2,3,4,5,6,7,8,9};
     int tam = 9;
@@ -115,6 +120,7 @@ void prueba_heap_menores_desencolar() {
 }
 
 void prueba_heap_elementos_repetidos() {
+    printf("%s\n","PRUEBAS ELEMENTOS REPETIDOS" );
     heap_t* heap = heap_crear(mayor);
     int numero[] = {1,1,2,2,3,3,4,4,5};
     int tam = 9;
@@ -131,23 +137,33 @@ void prueba_heap_elementos_repetidos() {
 }
 
 void prueba_heap_sort() {
-    int numero[] = {3,4,1,2,8,6,5,9,7};
-    int ordenado[] = {1,2,3,4,5,6,7,8,9};
-    int tam = 9;
-    void** parametro = crear_valores(tam, numero);
-    heap_sort(parametro, tam, mayor);
+    printf("%s\n", "PRUEBAS HEAPSORT");
+    int tres = 3;
+    int cinco = 5;
+    int seis = 6;
+    void* numeros[3];
+    void* ordenado[3];
+    numeros[0] = &cinco;
+    numeros[1] = &tres;
+    numeros[2] = &seis;
+    ordenado[0] = &tres;
+    ordenado[1] = &cinco;
+    ordenado[2] = &seis;
+    heap_sort(numeros, 3, mayor);
+
     bool esta_ordenado = true;
-    for(int i=0; i<tam; i++) {
-        if(ordenado[i] != *(int*)parametro[i]) {
+    for(int i=0; i<3; i++) {
+        if(ordenado[i] != numeros[i]) {
             esta_ordenado = false;
             break;
         }
     }
     print_test("esta ordenado", esta_ordenado);
-    destruir_valores(parametro, tam);
+
 }
 
 void prueba_heap_destruir() {
+    printf("%s\n","PRUEBAS DESTRUIR" );
     heap_t* heap = heap_crear(mayor);
     int numero[] = {};
     int tam = 0;
@@ -160,6 +176,7 @@ void prueba_heap_destruir() {
 }
 
 void prueba_heap_crear_arr() {
+    printf("%s\n","PRUEBAS HEAPIFY");
     int numero[] = {3,4,1,2,8,6,5,9,7};
     int ordenado[] = {9,8,6,7,3,1,5,2,4};
     int tam = 9;
@@ -172,18 +189,40 @@ void prueba_heap_crear_arr() {
             break;
         }
     }
-    print_test("heapify", heapify);
+    print_test("Creo un heap", heapify);
+    heap_destruir(heap, free);
+}
+
+void prueba_volumen(int volumen){
+    printf("%s\n", "PRUEBAS VOLUMEN");
+    heap_t* heap = heap_crear(mayor);
+    int i;
+    for (i = 0; i < volumen; ++i)
+    {
+        void* elemento = &i;
+        heap_encolar(heap, elemento);
+    }
+
+    void* max = &i;
+
+    print_test("Se encolaron n elementos en orden", heap_ver_max(heap) == max);
+
+    for (int j = 0; j < volumen; ++j)
+    {
+        heap_desencolar(heap);
+    }
     heap_destruir(heap, free);
 }
 
 void pruebas_heap_alumno() {
-    //prueba_crear();
-    //prueba_heap_mayores_encolar();
-    //prueba_heap_menores_encolar();
-    //prueba_heap_mayores_desencolar();
-    //prueba_heap_menores_desencolar();
-    //prueba_heap_elementos_repetidos();
+    prueba_crear();
+    prueba_heap_mayores_encolar();
+    prueba_heap_menores_encolar();
+    prueba_heap_mayores_desencolar();
+    prueba_heap_menores_desencolar();
+    prueba_heap_elementos_repetidos();
     prueba_heap_sort();
-    //prueba_heap_destruir();
-    //prueba_heap_crear_arr();
+    prueba_heap_destruir();
+    prueba_heap_crear_arr();
+    prueba_volumen(1000);
 }
