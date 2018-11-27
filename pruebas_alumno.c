@@ -59,7 +59,7 @@ void prueba_heap_mayores_encolar() {
     printf("%s\n","PRUEBAS ENCOLAR MAYORES");
     heap_t* heap = heap_crear(mayor);
     int numero[] = {1,2,3,4,5,6,7,8,9};
-    int tam = 9; 
+    int tam = 9;
     for(int i=0; i<tam; i++) {
         heap_encolar(heap, &numero[i]);
         printf("nuevo maximo es %i", numero[i]);
@@ -74,7 +74,7 @@ void prueba_heap_menores_encolar() {
     printf("%s\n","PRUEBAS ENCOLAR MENORES" );
     heap_t* heap = heap_crear(menor);
     int numero[] = {1,2,3,4,5,6,7,8,9};
-    int tam = 9; 
+    int tam = 9;
     for(int i=tam-1; i>=0; i--) {
         heap_encolar(heap, &numero[i]);
         printf("nuevo minimo es %i", numero[i]);
@@ -89,7 +89,7 @@ void prueba_heap_mayores_desencolar() {
     printf("%s\n","PRUEBAS DESENCOLAR MAYORES" );
     heap_t* heap = heap_crear(mayor);
     int numero[] = {1,2,3,4,5,6,7,8,9};
-    int tam = 9; 
+    int tam = 9;
     for(int i=0; i<tam; i++) {
         heap_encolar(heap, &numero[i]);
     }
@@ -172,25 +172,37 @@ void prueba_heap_destruir() {
         heap_encolar(heap, valores[i]);
     }
     heap_destruir(heap, free);
+    print_test("se destruyo el heap", true);
     free(valores);
 }
 
 void prueba_heap_crear_arr() {
     printf("%s\n","PRUEBAS HEAPIFY");
-    int numero[] = {3,4,1,2,8,6,5,9,7};
-    int ordenado[] = {9,8,6,7,3,1,5,2,4};
-    int tam = 9;
+    int numero[] = {3,4,1};
+    int tam = 3;
     void** parametro = crear_valores(tam, numero);
     heap_t* heap = heap_crear_arr(parametro, tam, mayor);
-    bool heapify = true;
-    for(int i=0; i<tam; i++) {
-        if(ordenado[i] != *(int*)parametro[i]) {
-            heapify = false;
-            break;
-        }
+
+    int extra[] = {1,2,0};
+    int tam_extra = 3;
+    void** extra_parametro = crear_valores(tam_extra, extra);
+    for(int i=0; i<tam_extra; i++) {
+        heap_encolar(heap, extra_parametro[i]);
+        print_test("4 sigue siendo el maximo", *(int*)heap_ver_max(heap) == 4);
     }
-    print_test("Creo un heap", heapify);
+
+    print_test("tamanio correcto", heap_cantidad(heap) == tam+tam_extra);
+
+    size_t cantidad = heap_cantidad(heap);
+
+    for (int j = 0; j < cantidad; ++j)
+    {
+        free(heap_desencolar(heap));
+    }
+    print_test("se desencolaron todos los elementos", heap_cantidad(heap) == 0);
     heap_destruir(heap, free);
+    free(parametro);
+    free(extra_parametro);
 }
 
 void prueba_volumen(int volumen){

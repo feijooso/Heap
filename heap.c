@@ -27,6 +27,7 @@ size_t pos_hijo_der(size_t pos) {
     return pos_hijo_izq(pos) + 1;
 }
 size_t pos_padre(size_t pos) {
+    if (pos == 0) return 0;
     return (pos-1)/2;
 }
 size_t pos_ultimo_padre(size_t tam) {
@@ -59,21 +60,21 @@ bool verificar_redimension(heap_t* heap) {
     return true;
 }
 
- void up_heap(void** datos, size_t pos, cmp_func_t cmp) {
+void up_heap(void** datos, size_t pos, cmp_func_t cmp) {
 
-     if(pos == 0) return;
+    if(pos == 0) return;
 
-     size_t posicion_padre = pos_padre(pos);
+    size_t posicion_padre = pos_padre(pos);
 
-     if(cmp(datos[pos], datos[posicion_padre]) > 0) {
+    if(cmp(datos[pos], datos[posicion_padre]) > 0) {
 
-         swap(datos, pos, posicion_padre);
+        swap(datos, pos, posicion_padre);
 
-     }
+    }
 
-     up_heap(datos, pos-1, cmp);
+    up_heap(datos, posicion_padre, cmp);
 
- }
+}
 
 void down_heap(void* arreglo[], size_t tam, size_t pos, cmp_func_t cmp) {
 
@@ -143,13 +144,17 @@ heap_t* heap_crear(cmp_func_t cmp) {
 heap_t* heap_crear_arr(void* arreglo[], size_t n, cmp_func_t cmp) {
     heap_t* heap = malloc(sizeof(heap_t));
     if(heap == NULL) return NULL;
-    heap->tamanio = TAMANIO_INICIAL;
+    if (n > TAMANIO_INICIAL) heap->tamanio = n;
+    else heap->tamanio = TAMANIO_INICIAL;
     heap->cantidad = n;
     heap->cmp = cmp;
-    heapify(arreglo, n, cmp);
-    heap->datos = arreglo;
+    void** datos_nuevo = malloc(sizeof(void*)* heap->tamanio);
+    for (int i = 0; i < n; i++) {
+        datos_nuevo[i] = arreglo[i];
+    }
+    heap->datos = datos_nuevo;
+    heapify(heap->datos, n, cmp);
     return heap;
-    return NULL;
 }
 
 /* Elimina el heap, llamando a la función dada para cada elemento del mismo.
@@ -158,8 +163,8 @@ heap_t* heap_crear_arr(void* arreglo[], size_t n, cmp_func_t cmp) {
  * dejó de ser válido. */
 void heap_destruir(heap_t* heap, void destruir_elemento(void* e)) {
     if(destruir_elemento != NULL) {
-        for(int i=0; i<heap->cantidad; i++) {
-            free(heap->datos[i]);
+        for(int i = 0; i < heap->cantidad ; i++) {
+            destruir_elemento(heap->datos[i]);
         }
     }
     free(heap->datos);
